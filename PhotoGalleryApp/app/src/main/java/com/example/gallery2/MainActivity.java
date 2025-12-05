@@ -104,17 +104,14 @@ public class MainActivity extends AppCompatActivity {
         for (Photo photo : allPhotos) {
             allPhotosFolder.addPhoto(photo);
         }
-        folders.add(allPhotosFolder);
 
         // 使用PhotoManager的新方法：根据DATE_ADDED+3天自动分组
         java.util.Map<String, List<Photo>> photosByDate = photoManager.getPhotosByDisplayDate();
 
-        // 获取所有日期并排序（升序：最近的日期在前）
-        List<String> sortedDates = new ArrayList<>(photosByDate.keySet());
-        java.util.Collections.sort(sortedDates); // yyyy-MM-dd 格式可以直接字符串排序
+        // 为日期文件夹创建一个临时列表
+        List<Folder> dateFolders = new ArrayList<>();
 
-        // 按照排序后的日期顺序添加文件夹
-        for (String date : sortedDates) {
+        for (String date : photosByDate.keySet()) {
             List<Photo> photos = photosByDate.get(date);
 
             if (photos != null && !photos.isEmpty()) {
@@ -123,9 +120,21 @@ public class MainActivity extends AppCompatActivity {
                 for (Photo photo : photos) {
                     folder.addPhoto(photo);
                 }
-                folders.add(folder);
+                dateFolders.add(folder);
             }
         }
+
+        // 关键：根据文件夹内照片的实际日期进行排序（降序，最新的在前）
+        java.util.Collections.sort(dateFolders, (f1, f2) -> {
+            // 每个文件夹里的照片时间都差不多，取第一个作为代表即可
+            long d1 = f1.getPhotos().get(0).getDateAdded();
+            long d2 = f2.getPhotos().get(0).getDateAdded();
+            return Long.compare(d1, d2); // d1 vs d2 实现升序 (最旧的在前)
+        });
+
+        // 将“所有图片”文件夹放在首位，然后添加排序后的日期文件夹
+        folders.add(allPhotosFolder);
+        folders.addAll(dateFolders);
 
         folderAdapter = new FolderAdapter(this, folders, folder -> {
             Intent intent = new Intent(MainActivity.this, GalleryActivity.class);

@@ -191,28 +191,32 @@ public class PhotoManager {
         Calendar originalCalendar = Calendar.getInstance();
         originalCalendar.setTimeInMillis(dateAddedSeconds * 1000);
 
+        // This calendar will be used to determine the final date, accounting for hour rollover
         Calendar targetCalendar = (Calendar) originalCalendar.clone();
         targetCalendar.add(Calendar.DAY_OF_YEAR, DELAY_DAYS);
+        targetCalendar.add(Calendar.HOUR_OF_DAY, 1); // Add 1 hour to handle rollover correctly
 
         int originalYear = originalCalendar.get(Calendar.YEAR);
-        int originalMonth = originalCalendar.get(Calendar.MONTH);
+        int originalMonth = originalCalendar.get(Calendar.MONTH); // 0-11
         int originalDay = originalCalendar.get(Calendar.DAY_OF_MONTH);
         int hour = originalCalendar.get(Calendar.HOUR_OF_DAY);
-        int nextHour = (hour + 1) % 24;
 
         int targetYear = targetCalendar.get(Calendar.YEAR);
-        int targetMonth = targetCalendar.get(Calendar.MONTH);
+        int targetMonth = targetCalendar.get(Calendar.MONTH); // 0-11
         int targetDay = targetCalendar.get(Calendar.DAY_OF_MONTH);
 
-        // 如果是同年同月，简化显示
+        // The end hour for display should be 0 if the original was 23
+        int displayEndHour = (hour + 1) % 24;
+
+        // Check if the date range crosses a month/year boundary for display
         if (originalYear == targetYear && originalMonth == targetMonth) {
             return String.format(Locale.getDefault(), "%d/%d/%d-%d\n%d:00-%d:00",
-                originalYear, originalMonth + 1, originalDay, targetDay, hour, nextHour);
+                originalYear, originalMonth + 1, originalDay, targetDay, hour, displayEndHour);
         } else {
-            // 跨月或跨年，完整显示
+            // Full format for cross-month or cross-year
             return String.format(Locale.getDefault(), "%d/%d/%d-%d/%d/%d\n%d:00-%d:00",
                 originalYear, originalMonth + 1, originalDay,
-                targetYear, targetMonth + 1, targetDay, hour, nextHour);
+                targetYear, targetMonth + 1, targetDay, hour, displayEndHour);
         }
     }
 
@@ -286,10 +290,11 @@ public class PhotoManager {
 
             // 设置时间为原始时间的下一个小时（时间段的结束时间）
             int hour = originalCalendar.get(Calendar.HOUR_OF_DAY);
-            int nextHour = (hour + 1) % 24;
+            int nextHour = hour + 1; // 移除 % 24, 让Calendar自动处理进位
             readCalendar.set(Calendar.HOUR_OF_DAY, nextHour);
             readCalendar.set(Calendar.MINUTE, 0);
             readCalendar.set(Calendar.SECOND, 0);
+            readCalendar.set(Calendar.MILLISECOND, 0); // 确保毫秒为0
 
             // 如果当前时间 > 阅读时间的结束时间，说明有过期文件夹
             if (now.after(readCalendar)) {
