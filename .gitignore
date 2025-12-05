@@ -1,0 +1,6 @@
+.claude/
+.idea/
+PhotoGalleryApp/.gradle/
+PhotoGalleryApp/.idea/
+PhotoGalleryApp/build/
+PhotoGalleryApp/app/build/
