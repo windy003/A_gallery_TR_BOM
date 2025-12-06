@@ -69,7 +69,7 @@ public class CompletedDateWidget extends AppWidgetProvider {
 
             // 使用HTML标签，"本机"为红色，日期和分钟为绿色，小时为红色
             String timeText = String.format(Locale.getDefault(),
-                "<font color='#FF0000'>本机</font><font color='#00FF00'>%d/%d </font><font color='#FF0000'>%02d</font><font color='#00FF00'>:%02d</font>",
+                "<font color='#FF0000'>本机</font><br><font color='#00FF00'>%d/%d </font><font color='#FF0000'>%02d</font><font color='#00FF00'>:%02d</font>",
                 month, day, hour, minute);
 
             views.setTextViewText(R.id.widget_date_text, android.text.Html.fromHtml(timeText, android.text.Html.FROM_HTML_MODE_LEGACY));
