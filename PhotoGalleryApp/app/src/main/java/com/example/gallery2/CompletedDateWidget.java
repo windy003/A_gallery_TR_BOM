@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.os.Build;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -23,6 +24,54 @@ import java.util.Locale;
 public class CompletedDateWidget extends AppWidgetProvider {
     private static final String PREFS_NAME = "IconManagerPrefs";
 
+    /**
+     * 设备配置类 - 根据不同手机型号定制显示参数
+     */
+    private static class DeviceConfig {
+        float countTextSize;      // "本机X个"的字体大小
+        float timeTextSize;       // 时间文字的字体大小
+        float dateTextSize;       // 日期文字的字体大小
+
+        DeviceConfig(float countTextSize, float timeTextSize, float dateTextSize) {
+            this.countTextSize = countTextSize;
+            this.timeTextSize = timeTextSize;
+            this.dateTextSize = dateTextSize;
+        }
+    }
+
+    /**
+     * 根据设备型号获取最佳显示配置（针对用户的四部手机定制）
+     */
+    private static DeviceConfig getDeviceConfig() {
+        String manufacturer = Build.MANUFACTURER.toLowerCase();
+        String model = Build.MODEL.toLowerCase();
+        String brand = Build.BRAND.toLowerCase();
+
+        Log.d("CompletedDateWidget", "设备信息 - 品牌: " + brand + ", 制造商: " + manufacturer + ", 型号: " + model);
+
+        // LG Wing 配置（两台）
+        if (model.contains("wing") || model.contains("lm-f100")) {
+            Log.d("CompletedDateWidget", "检测到LG Wing，使用LG Wing专用配置");
+            return new DeviceConfig(20f, 14f, 14f);  // 所有字体都调大
+        }
+
+        // 小米12 Pro 配置
+        if (model.contains("2201122c") || model.contains("mi 12 pro") || model.contains("2201122")) {
+            Log.d("CompletedDateWidget", "检测到小米12 Pro，使用小米12 Pro专用配置");
+            return new DeviceConfig(10f, 8f, 8f);
+        }
+
+        // 小米MIX Fold 2 配置
+        if (model.contains("22061218c") || model.contains("mix fold 2") || model.contains("mixfold2")) {
+            Log.d("CompletedDateWidget", "检测到小米MIX Fold 2，使用MIX Fold 2专用配置");
+            return new DeviceConfig(15f, 10f, 10f);  // 折叠屏幕更大，用更大的字体
+        }
+
+        // 默认配置（其他设备）
+        Log.d("CompletedDateWidget", "未识别的设备，使用默认配置");
+        return new DeviceConfig(12f, 8f, 8f);
+    }
+
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // 更新所有的widget实例
@@ -35,6 +84,9 @@ public class CompletedDateWidget extends AppWidgetProvider {
      * 更新单个widget
      */
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {
+        // 获取当前设备的配置
+        DeviceConfig config = getDeviceConfig();
+
         // 检测是否有过期的文件夹
         PhotoManager photoManager = new PhotoManager(context);
         boolean hasExpired = photoManager.hasExpiredFolders();
@@ -50,8 +102,11 @@ public class CompletedDateWidget extends AppWidgetProvider {
             views.setViewVisibility(R.id.widget_icon, android.view.View.GONE);
             views.setViewVisibility(R.id.widget_date_text, android.view.View.GONE);
 
-            String countText = String.format(Locale.getDefault(), "本机%d个", photoCount);
-            views.setTextViewText(R.id.widget_photo_count, countText);
+            // 使用HTML标签，数字为红色
+            String countText = String.format(Locale.getDefault(),
+                "本机<font color='#FF0000'>%d</font>个", photoCount);
+            views.setTextViewText(R.id.widget_photo_count, android.text.Html.fromHtml(countText, android.text.Html.FROM_HTML_MODE_LEGACY));
+            views.setTextViewTextSize(R.id.widget_photo_count, android.util.TypedValue.COMPLEX_UNIT_SP, config.countTextSize);
             views.setViewVisibility(R.id.widget_photo_count, android.view.View.VISIBLE);
 
             // 显示检查时间
@@ -67,6 +122,7 @@ public class CompletedDateWidget extends AppWidgetProvider {
                 month, day, hour, minute);
 
             views.setTextViewText(R.id.widget_check_time, android.text.Html.fromHtml(timeText, android.text.Html.FROM_HTML_MODE_LEGACY));
+            views.setTextViewTextSize(R.id.widget_check_time, android.util.TypedValue.COMPLEX_UNIT_SP, config.timeTextSize);
             views.setViewVisibility(R.id.widget_check_time, android.view.View.VISIBLE);
 
             Log.d("CompletedDateWidget", "有过期文件夹，显示图片数量: " + photoCount + "，检查时间: " + month + "/" + day + " " + hour + ":" + minute);
@@ -89,6 +145,7 @@ public class CompletedDateWidget extends AppWidgetProvider {
                 month, day, hour, minute);
 
             views.setTextViewText(R.id.widget_date_text, android.text.Html.fromHtml(timeText, android.text.Html.FROM_HTML_MODE_LEGACY));
+            views.setTextViewTextSize(R.id.widget_date_text, android.util.TypedValue.COMPLEX_UNIT_SP, config.dateTextSize);
             views.setViewVisibility(R.id.widget_date_text, android.view.View.VISIBLE);
 
             Log.d("CompletedDateWidget", "没有过期文件夹，显示时间: " + month + "/" + day + " " + hour + ":" + minute);
