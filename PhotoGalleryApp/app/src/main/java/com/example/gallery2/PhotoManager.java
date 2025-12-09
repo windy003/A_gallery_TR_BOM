@@ -164,87 +164,6 @@ public class PhotoManager {
     }
 
     /**
-     * 根据图片的 DATE_ADDED + DELAY_DAYS 对图片进行分组
-     *
-     * @return Map<日期字符串, 图片列表>，按日期倒序排列
-     */
-    public Map<String, List<Photo>> getPhotosByDisplayDate() {
-        Map<String, List<Photo>> photoMap = new LinkedHashMap<>();
-        List<Photo> allPhotos = getAllPhotos();
-
-        for (Photo photo : allPhotos) {
-            String displayDate = getDisplayDate(photo.getDateAdded());
-
-            if (!photoMap.containsKey(displayDate)) {
-                photoMap.put(displayDate, new ArrayList<>());
-            }
-            photoMap.get(displayDate).add(photo);
-        }
-
-        return photoMap;
-    }
-
-    /**
-     * 获取指定日期的所有图片
-     *
-     * @param dateString 日期字符串，格式：yyyy-MM-dd
-     * @return 该日期对应的图片列表
-     */
-    public List<Photo> getPhotosForDate(String dateString) {
-        List<Photo> photos = new ArrayList<>();
-        List<Photo> allPhotos = getAllPhotos();
-
-        for (Photo photo : allPhotos) {
-            String displayDate = getDisplayDate(photo.getDateAdded());
-            if (displayDate.equals(dateString)) {
-                photos.add(photo);
-            }
-        }
-
-        return photos;
-    }
-
-    /**
-     * 根据图片的DATE_ADDED计算显示日期
-     * 显示原始日期到+3天后的日期范围（表示阅读日期），按原始日期的小时段分组
-     *
-     * @param dateAddedSeconds DATE_ADDED时间戳（秒）
-     * @return 日期字符串，格式：yyyy/MM/d-d HH:00-HH:00（同月）或 yyyy/MM/d-yyyy/MM/d HH:00-HH:00（跨月/年）
-     */
-    public String getDisplayDate(long dateAddedSeconds) {
-        Calendar originalCalendar = Calendar.getInstance();
-        originalCalendar.setTimeInMillis(dateAddedSeconds * 1000);
-
-        // This calendar will be used to determine the final date, accounting for hour rollover
-        Calendar targetCalendar = (Calendar) originalCalendar.clone();
-        targetCalendar.add(Calendar.DAY_OF_YEAR, DELAY_DAYS);
-        targetCalendar.add(Calendar.HOUR_OF_DAY, 1); // Add 1 hour to handle rollover correctly
-
-        int originalYear = originalCalendar.get(Calendar.YEAR);
-        int originalMonth = originalCalendar.get(Calendar.MONTH); // 0-11
-        int originalDay = originalCalendar.get(Calendar.DAY_OF_MONTH);
-        int hour = originalCalendar.get(Calendar.HOUR_OF_DAY);
-
-        int targetYear = targetCalendar.get(Calendar.YEAR);
-        int targetMonth = targetCalendar.get(Calendar.MONTH); // 0-11
-        int targetDay = targetCalendar.get(Calendar.DAY_OF_MONTH);
-
-        // The end hour for display should be 0 if the original was 23
-        int displayEndHour = (hour + 1) % 24;
-
-        // Check if the date range crosses a month/year boundary for display
-        if (originalYear == targetYear && originalMonth == targetMonth) {
-            return String.format(Locale.getDefault(), "%d/%d/%d-%d\n%d:00-%d:00",
-                originalYear, originalMonth + 1, originalDay, targetDay, hour, displayEndHour);
-        } else {
-            // Full format for cross-month or cross-year
-            return String.format(Locale.getDefault(), "%d/%d/%d-%d/%d/%d\n%d:00-%d:00",
-                originalYear, originalMonth + 1, originalDay,
-                targetYear, targetMonth + 1, targetDay, hour, displayEndHour);
-        }
-    }
-
-    /**
      * 获取今天的日期字符串
      */
     public static String getTodayDate() {
@@ -260,16 +179,6 @@ public class PhotoManager {
         calendar.add(Calendar.DAY_OF_YEAR, days);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         return sdf.format(calendar.getTime());
-    }
-
-    /**
-     * 获取图片应该显示的日期（用于UI显示）
-     *
-     * @param photo 图片对象
-     * @return 日期字符串
-     */
-    public String getPhotoDisplayDate(Photo photo) {
-        return getDisplayDate(photo.getDateAdded());
     }
 
     /**

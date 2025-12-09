@@ -8,13 +8,11 @@ public class Folder {
     private String displayName;
     private List<Photo> photos;
     private String coverPhotoPath;
-    private boolean isDateFolder;
 
     public Folder(String name, String displayName) {
         this.name = name;
         this.displayName = displayName;
         this.photos = new ArrayList<>();
-        this.isDateFolder = false;
     }
 
     public void addPhoto(Photo photo) {
@@ -46,13 +44,5 @@ public class Folder {
 
     public int getPhotoCount() {
         return photos.size();
-    }
-
-    public void setDateFolder(boolean dateFolder) {
-        isDateFolder = dateFolder;
-    }
-
-    public boolean isDateFolder() {
-        return isDateFolder;
     }
 }

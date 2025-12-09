@@ -107,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
 
         // 创建"已到期"文件夹，只包含已到期的图片
         Folder expiredFolder = new Folder("expired", "已到期");
-        expiredFolder.setDateFolder(false);
 
         // 计算过期时间线（用于调试输出）
         java.util.Calendar expirationTime = java.util.Calendar.getInstance();
@@ -151,7 +150,6 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, GalleryActivity.class);
             intent.putExtra("folder_name", folder.getName());
             intent.putExtra("folder_display_name", folder.getDisplayName());
-            intent.putExtra("is_date_folder", folder.isDateFolder());
             galleryLauncher.launch(intent);
         });
 

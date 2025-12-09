@@ -49,7 +49,6 @@ public class ImageViewerActivity extends AppCompatActivity {
     private ActivityResultLauncher<IntentSenderRequest> deleteRequestLauncher;
     private ActivityResultLauncher<IntentSenderRequest> delayDeleteRequestLauncher;
     private String folderName;
-    private boolean isDateFolder;
     private FileOperationHelper fileOperationHelper;
     private Photo photoToDelay; // 临时存储待延迟的图片
     private int positionToDelay; // 临时存储待延迟的位置
@@ -111,7 +110,6 @@ public class ImageViewerActivity extends AppCompatActivity {
         photos = (ArrayList<Photo>) getIntent().getSerializableExtra("photos");
         currentPosition = getIntent().getIntExtra("position", 0);
         folderName = getIntent().getStringExtra("folder_name");
-        isDateFolder = getIntent().getBooleanExtra("is_date_folder", false);
 
         fileOperationHelper = new FileOperationHelper(this);
 

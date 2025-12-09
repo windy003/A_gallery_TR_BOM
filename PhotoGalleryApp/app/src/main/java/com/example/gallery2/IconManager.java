@@ -26,14 +26,14 @@ public class IconManager {
 
     /**
      * 检查并更新应用状态
-     * 逻辑：所有日期文件夹都在当天之后 -> 已完成状态
-     *      存在当天或之前的日期文件夹 -> 未完成状态
+     * 逻辑：已过期文件夹为空 -> 已完成状态
+     *      已过期文件夹有内容 -> 未完成状态
      * 注意：APP图标不再切换，只更新小部件显示
      */
     public void updateAppIcon() {
         Log.d(TAG, "开始更新应用图标状态");
 
-        boolean shouldShowCompleted = areAllDateFoldersAfterToday();
+        boolean shouldShowCompleted = isExpiredFolderEmpty();
         boolean isCurrentlyCompleted = getCompletedStatus();
 
         Log.d(TAG, "应该显示已完成: " + shouldShowCompleted + ", 当前状态: " + isCurrentlyCompleted);
@@ -69,28 +69,23 @@ public class IconManager {
     }
 
     /**
-     * 检查所有日期文件夹是否都在当天之后
-     * 基于PhotoManager的真实日期分组（DATE_ADDED + 3天）
+     * 检查已过期文件夹是否为空
+     * 如果已过期文件夹为空，说明没有需要处理的过期照片，返回true（已完成）
      */
-    private boolean areAllDateFoldersAfterToday() {
-        java.util.Map<String, List<Photo>> photosByDate = photoManager.getPhotosByDisplayDate();
+    private boolean isExpiredFolderEmpty() {
+        List<Photo> allPhotos = photoManager.getAllPhotos();
 
-        // 如果没有日期文件夹，认为是已完成状态
-        if (photosByDate == null || photosByDate.isEmpty()) {
-            return true;
-        }
-
-        String today = getTodayDateString();
-
-        // 检查是否所有日期文件夹都在今天之后
-        for (String dateFolder : photosByDate.keySet()) {
-            if (dateFolder.compareTo(today) <= 0) {
-                // 存在当天或之前的日期文件夹，未完成
+        // 遍历所有照片，检查是否有已过期的
+        for (Photo photo : allPhotos) {
+            List<Photo> singlePhotoList = new java.util.ArrayList<>();
+            singlePhotoList.add(photo);
+            if (photoManager.isFolderExpired(singlePhotoList)) {
+                // 发现已过期的照片，未完成
                 return false;
             }
         }
 
-        // 所有日期文件夹都在今天之后，已完成
+        // 没有已过期的照片，已完成
         return true;
     }
 
