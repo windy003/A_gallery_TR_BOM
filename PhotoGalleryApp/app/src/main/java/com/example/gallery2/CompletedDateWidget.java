@@ -50,19 +50,19 @@ public class CompletedDateWidget extends AppWidgetProvider {
         // LG Wing 配置（两台）
         if (model.contains("wing") || model.contains("lm-f100")) {
             Log.d("CompletedDateWidget", "检测到LG Wing，使用LG Wing专用配置");
-            return new DeviceConfig(20f, 14f);  // 所有字体都调大
+            return new DeviceConfig(20f, 20f);  // 所有字体都调大
         }
 
         // 小米12 Pro 配置
         if (model.contains("2201122c") || model.contains("mi 12 pro") || model.contains("2201122")) {
             Log.d("CompletedDateWidget", "检测到小米12 Pro，使用小米12 Pro专用配置");
-            return new DeviceConfig(8f, 8f);
+            return new DeviceConfig(11f, 11f);
         }
 
         // 小米MIX Fold 2 配置
         if (model.contains("22061218c") || model.contains("mix fold 2") || model.contains("mixfold2")) {
             Log.d("CompletedDateWidget", "检测到小米MIX Fold 2，使用MIX Fold 2专用配置");
-            return new DeviceConfig(11f, 11f);  // 折叠屏幕更大，用更大的字体
+            return new DeviceConfig(15f, 15f);  // 折叠屏幕更大，用更大的字体
         }
 
         // 默认配置（其他设备）
