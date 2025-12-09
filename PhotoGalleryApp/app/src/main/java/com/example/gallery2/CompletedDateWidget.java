@@ -58,13 +58,13 @@ public class CompletedDateWidget extends AppWidgetProvider {
         // 小米12 Pro 配置
         if (model.contains("2201122c") || model.contains("mi 12 pro") || model.contains("2201122")) {
             Log.d("CompletedDateWidget", "检测到小米12 Pro，使用小米12 Pro专用配置");
-            return new DeviceConfig(10f, 8f, 12f);
+            return new DeviceConfig(8f, 8f, 12f);
         }
 
         // 小米MIX Fold 2 配置
         if (model.contains("22061218c") || model.contains("mix fold 2") || model.contains("mixfold2")) {
             Log.d("CompletedDateWidget", "检测到小米MIX Fold 2，使用MIX Fold 2专用配置");
-            return new DeviceConfig(15f, 10f, 10f);  // 折叠屏幕更大，用更大的字体
+            return new DeviceConfig(11f, 11f, 11f);  // 折叠屏幕更大，用更大的字体
         }
 
         // 默认配置（其他设备）
@@ -102,9 +102,9 @@ public class CompletedDateWidget extends AppWidgetProvider {
             views.setViewVisibility(R.id.widget_icon, android.view.View.GONE);
             views.setViewVisibility(R.id.widget_date_text, android.view.View.GONE);
 
-            // 使用HTML标签，数字为红色
+            // 使用HTML标签，"本机"和"个"为黑色，数字为红色
             String countText = String.format(Locale.getDefault(),
-                "本机<font color='#FF0000'>%d</font>个", photoCount);
+                "<font color='#000000'>本机</font><font color='#FF0000'>%d</font><font color='#000000'>个</font>", photoCount);
             views.setTextViewText(R.id.widget_photo_count, android.text.Html.fromHtml(countText, android.text.Html.FROM_HTML_MODE_LEGACY));
             views.setTextViewTextSize(R.id.widget_photo_count, android.util.TypedValue.COMPLEX_UNIT_SP, config.countTextSize);
             views.setViewVisibility(R.id.widget_photo_count, android.view.View.VISIBLE);
@@ -127,28 +127,34 @@ public class CompletedDateWidget extends AppWidgetProvider {
 
             Log.d("CompletedDateWidget", "有过期文件夹，显示图片数量: " + photoCount + "，检查时间: " + month + "/" + day + " " + hour + ":" + minute);
         } else {
-            // 没有过期文件夹：显示当前时间，小时为红色
+            // 没有过期文件夹：显示"本机0个"和检查时间
             views.setViewVisibility(R.id.widget_icon, android.view.View.GONE);
-            views.setViewVisibility(R.id.widget_photo_count, android.view.View.GONE);
-            views.setViewVisibility(R.id.widget_check_time, android.view.View.GONE);
+            views.setViewVisibility(R.id.widget_date_text, android.view.View.GONE);
 
-            // 获取当前时间
+            // 使用HTML标签，"本机"和"个"为黑色，数字0为红色
+            String countText = String.format(Locale.getDefault(),
+                "<font color='#000000'>本机</font><font color='#FF0000'>%d</font><font color='#000000'>个</font>", photoCount);
+            views.setTextViewText(R.id.widget_photo_count, android.text.Html.fromHtml(countText, android.text.Html.FROM_HTML_MODE_LEGACY));
+            views.setTextViewTextSize(R.id.widget_photo_count, android.util.TypedValue.COMPLEX_UNIT_SP, config.countTextSize);
+            views.setViewVisibility(R.id.widget_photo_count, android.view.View.VISIBLE);
+
+            // 显示检查时间
             Calendar now = Calendar.getInstance();
             int month = now.get(Calendar.MONTH) + 1;
             int day = now.get(Calendar.DAY_OF_MONTH);
             int hour = now.get(Calendar.HOUR_OF_DAY);
             int minute = now.get(Calendar.MINUTE);
 
-            // 使用HTML标签，"本机"为红色，日期和分钟为绿色，小时为红色
+            // 使用HTML标签，日期和分钟为绿色，小时为红色
             String timeText = String.format(Locale.getDefault(),
-                "<font color='#FF0000'>本机</font><br><font color='#00FF00'>%d/%d </font><font color='#FF0000'>%02d</font><font color='#00FF00'>:%02d</font>",
+                "<font color='#00FF00'>%d/%d </font><font color='#FF0000'>%02d</font><font color='#00FF00'>:%02d</font>",
                 month, day, hour, minute);
 
-            views.setTextViewText(R.id.widget_date_text, android.text.Html.fromHtml(timeText, android.text.Html.FROM_HTML_MODE_LEGACY));
-            views.setTextViewTextSize(R.id.widget_date_text, android.util.TypedValue.COMPLEX_UNIT_SP, config.dateTextSize);
-            views.setViewVisibility(R.id.widget_date_text, android.view.View.VISIBLE);
+            views.setTextViewText(R.id.widget_check_time, android.text.Html.fromHtml(timeText, android.text.Html.FROM_HTML_MODE_LEGACY));
+            views.setTextViewTextSize(R.id.widget_check_time, android.util.TypedValue.COMPLEX_UNIT_SP, config.timeTextSize);
+            views.setViewVisibility(R.id.widget_check_time, android.view.View.VISIBLE);
 
-            Log.d("CompletedDateWidget", "没有过期文件夹，显示时间: " + month + "/" + day + " " + hour + ":" + minute);
+            Log.d("CompletedDateWidget", "没有过期文件夹，显示图片数量: 0，检查时间: " + month + "/" + day + " " + hour + ":" + minute);
         }
 
         // 设置点击事件 - 点击widget打开应用
