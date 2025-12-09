@@ -99,7 +99,6 @@ public class CompletedDateWidget extends AppWidgetProvider {
 
         if (hasExpired) {
             // 有过期文件夹：显示图片数量 "本机X个" 和检查时间
-            views.setViewVisibility(R.id.widget_icon, android.view.View.GONE);
             views.setViewVisibility(R.id.widget_date_text, android.view.View.GONE);
 
             // 使用HTML标签，"本机"和"个"为黑色，数字为红色
@@ -128,7 +127,6 @@ public class CompletedDateWidget extends AppWidgetProvider {
             Log.d("CompletedDateWidget", "有过期文件夹，显示图片数量: " + photoCount + "，检查时间: " + month + "/" + day + " " + hour + ":" + minute);
         } else {
             // 没有过期文件夹：显示"本机0个"和检查时间
-            views.setViewVisibility(R.id.widget_icon, android.view.View.GONE);
             views.setViewVisibility(R.id.widget_date_text, android.view.View.GONE);
 
             // 使用HTML标签，"本机"和"个"为黑色，数字0为红色
