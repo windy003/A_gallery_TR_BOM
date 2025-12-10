@@ -37,20 +37,26 @@ public class PhotoCheckService extends Service {
         super.onCreate();
         Log.d(TAG, "Service created");
 
-        photoManager = new PhotoManager(this);
-        handler = new Handler(Looper.getMainLooper());
+        try {
+            photoManager = new PhotoManager(this);
+            handler = new Handler(Looper.getMainLooper());
 
-        // 创建通知渠道
-        createNotificationChannels();
+            // 创建通知渠道
+            createNotificationChannels();
 
-        // 启动前台服务
-        startForeground(SERVICE_NOTIFICATION_ID, createServiceNotification());
+            // 启动前台服务
+            startForeground(SERVICE_NOTIFICATION_ID, createServiceNotification());
 
-        // 初始化最后过期数量
-        lastExpiredCount = photoManager.getExpiredPhotoCount();
+            // 初始化最后过期数量
+            lastExpiredCount = photoManager.getExpiredPhotoCount();
 
-        // 开始定期检查
-        startPeriodicCheck();
+            // 开始定期检查
+            startPeriodicCheck();
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to start service", e);
+            // 如果启动失败，停止服务
+            stopSelf();
+        }
     }
 
     @Override

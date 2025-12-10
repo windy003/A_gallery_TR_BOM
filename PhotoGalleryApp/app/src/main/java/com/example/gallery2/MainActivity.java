@@ -50,12 +50,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (checkPermissions()) {
             loadFolders();
+            // 启动后台图片检查服务（只在有权限时启动）
+            startPhotoCheckService();
         } else {
             requestPermissions();
         }
-
-        // 启动后台图片检查服务
-        startPhotoCheckService();
     }
 
     /**
@@ -77,7 +76,9 @@ public class MainActivity extends AppCompatActivity {
                     == PackageManager.PERMISSION_GRANTED;
             boolean hasVideoPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO)
                     == PackageManager.PERMISSION_GRANTED;
-            return hasImagePermission && hasVideoPermission;
+            boolean hasNotificationPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    == PackageManager.PERMISSION_GRANTED;
+            return hasImagePermission && hasVideoPermission && hasNotificationPermission;
         } else {
             return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED;
@@ -87,7 +88,11 @@ public class MainActivity extends AppCompatActivity {
     private void requestPermissions() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO},
+                    new String[]{
+                        Manifest.permission.READ_MEDIA_IMAGES,
+                        Manifest.permission.READ_MEDIA_VIDEO,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    },
                     PERMISSION_REQUEST_CODE);
         } else {
             ActivityCompat.requestPermissions(this,
@@ -103,6 +108,8 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 loadFolders();
+                // 权限授予后启动后台服务
+                startPhotoCheckService();
             } else {
                 Toast.makeText(this, "需要存储权限才能查看照片", Toast.LENGTH_LONG).show();
             }
