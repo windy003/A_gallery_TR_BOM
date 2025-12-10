@@ -53,6 +53,22 @@ public class MainActivity extends AppCompatActivity {
         } else {
             requestPermissions();
         }
+
+        // 启动后台图片检查服务
+        startPhotoCheckService();
+    }
+
+    /**
+     * 启动后台图片检查服务
+     */
+    private void startPhotoCheckService() {
+        Intent serviceIntent = new Intent(this, PhotoCheckService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Android 8.0及以上使用startForegroundService
+            startForegroundService(serviceIntent);
+        } else {
+            startService(serviceIntent);
+        }
     }
 
     private boolean checkPermissions() {
