@@ -107,12 +107,4 @@ class IconManager(private val context: Context) {
 
         editor.apply()
     }
-
-    /**
-     * 获取今天的日期字符串 (格式: yyyy-MM-dd)
-     */
-    private fun getTodayDateString(): String {
-        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        return sdf.format(Date())
-    }
 }

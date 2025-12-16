@@ -4,30 +4,11 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.*
 
 class PhotoManager(private val context: Context) {
     companion object {
         private const val DELAY_DAYS = 3 // 延迟天数
-
-        /**
-         * 获取今天的日期字符串
-         */
-        fun getTodayDate(): String {
-            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            return sdf.format(Date())
-        }
-
-        /**
-         * 获取指定天数后的日期字符串
-         */
-        fun getDateAfterDays(days: Int): String {
-            val calendar = Calendar.getInstance()
-            calendar.add(Calendar.DAY_OF_YEAR, days)
-            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            return sdf.format(calendar.time)
-        }
     }
 
     /**

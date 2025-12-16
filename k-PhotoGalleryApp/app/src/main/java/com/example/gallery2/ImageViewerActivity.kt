@@ -72,12 +72,6 @@ class ImageViewerActivity : AppCompatActivity() {
         }
     }
 
-    private val delayDeleteRequestLauncher = registerForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) { result ->
-        // 暂不使用
-    }
-
     @Suppress("UNCHECKED_CAST", "DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

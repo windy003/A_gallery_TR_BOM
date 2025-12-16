@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import java.io.File
@@ -34,13 +33,6 @@ class PhotoAdapter(
             .centerCrop()
             .into(holder.imageViewPhoto)
 
-        // 隐藏视频相关元素
-        holder.imageViewPlayIcon?.visibility = View.GONE
-        holder.textViewDuration?.visibility = View.GONE
-
-        // 隐藏日期标签（现在完全基于真实创建时间归类，不需要显示）
-        holder.textViewAdded.visibility = View.GONE
-
         holder.itemView.setOnClickListener {
             listener.onPhotoClick(position)
         }
@@ -50,8 +42,5 @@ class PhotoAdapter(
 
     class PhotoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageViewPhoto: ImageView = itemView.findViewById(R.id.imageViewPhoto)
-        val imageViewPlayIcon: ImageView? = itemView.findViewById(R.id.imageViewPlayIcon)
-        val textViewAdded: TextView = itemView.findViewById(R.id.textViewAdded)
-        val textViewDuration: TextView? = itemView.findViewById(R.id.textViewDuration)
     }
 }
