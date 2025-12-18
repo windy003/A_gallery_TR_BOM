@@ -1,5 +1,6 @@
 package com.example.gallery2
 
+import android.app.AlarmManager
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
@@ -20,6 +21,7 @@ import java.util.*
 class CompletedDateWidget : AppWidgetProvider() {
     companion object {
         private const val PREFS_NAME = "IconManagerPrefs"
+        private const val ACTION_AUTO_UPDATE = "com.example.gallery2.ACTION_AUTO_UPDATE"
 
         /**
          * 设备配置类 - 根据不同手机型号定制显示参数
@@ -181,12 +183,130 @@ class CompletedDateWidget : AppWidgetProvider() {
                 e.printStackTrace()
             }
         }
+
+        /**
+         * 启动定时更新任务 - 每分钟更新一次
+         */
+        fun startAutoUpdate(context: Context) {
+            try {
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val intent = Intent(context, CompletedDateWidget::class.java).apply {
+                    action = ACTION_AUTO_UPDATE
+                }
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                // 计算下一分钟整点的时间
+                val calendar = Calendar.getInstance().apply {
+                    add(Calendar.MINUTE, 1)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+
+                // 检查并使用精确闹钟
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    // Android 12+ 检查是否可以设置精确闹钟
+                    if (alarmManager.canScheduleExactAlarms()) {
+                        alarmManager.setExactAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            calendar.timeInMillis,
+                            pendingIntent
+                        )
+                        Log.d("CompletedDateWidget", "使用 setExactAndAllowWhileIdle，下次更新时间: ${calendar.time}")
+                    } else {
+                        Log.w("CompletedDateWidget", "没有精确闹钟权限，使用 setAndAllowWhileIdle")
+                        alarmManager.setAndAllowWhileIdle(
+                            AlarmManager.RTC_WAKEUP,
+                            calendar.timeInMillis,
+                            pendingIntent
+                        )
+                    }
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    // Android 6.0+
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                    Log.d("CompletedDateWidget", "使用 setExactAndAllowWhileIdle，下次更新时间: ${calendar.time}")
+                } else {
+                    // Android 6.0 以下
+                    alarmManager.setExact(
+                        AlarmManager.RTC_WAKEUP,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                    Log.d("CompletedDateWidget", "使用 setExact，下次更新时间: ${calendar.time}")
+                }
+            } catch (e: Exception) {
+                Log.e("CompletedDateWidget", "启动定时更新失败: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+
+        /**
+         * 停止定时更新任务
+         */
+        fun stopAutoUpdate(context: Context) {
+            try {
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val intent = Intent(context, CompletedDateWidget::class.java).apply {
+                    action = ACTION_AUTO_UPDATE
+                }
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+
+                alarmManager.cancel(pendingIntent)
+                Log.d("CompletedDateWidget", "停止定时更新任务")
+            } catch (e: Exception) {
+                Log.e("CompletedDateWidget", "停止定时更新失败: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+    }
+
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+
+        // 处理定时更新广播
+        if (intent.action == ACTION_AUTO_UPDATE) {
+            Log.d("CompletedDateWidget", "收到定时更新广播")
+            // 更新所有小部件
+            updateAllWidgets(context)
+            // 重新设置下一次的定时任务（因为精确闹钟只触发一次）
+            startAutoUpdate(context)
+        }
     }
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+        Log.d("CompletedDateWidget", "onUpdate 被调用")
         // 更新所有的widget实例
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
+        // 启动定时更新
+        startAutoUpdate(context)
+    }
+
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        Log.d("CompletedDateWidget", "第一个小部件被添加，启动定时更新")
+        // 第一个小部件被添加到桌面时，启动定时更新
+        startAutoUpdate(context)
+    }
+
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        Log.d("CompletedDateWidget", "最后一个小部件被移除，停止定时更新")
+        // 最后一个小部件从桌面移除时，停止定时更新
+        stopAutoUpdate(context)
     }
 }

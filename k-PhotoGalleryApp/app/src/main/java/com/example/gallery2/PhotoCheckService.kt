@@ -164,6 +164,9 @@ class PhotoCheckService : Service() {
                 CompletedDateWidget.updateAllWidgets(this)
             }
 
+            // 每次检查时都更新小部件显示的时间（确保时间保持同步）
+            CompletedDateWidget.updateAllWidgets(this)
+
             // 如果过期图片数量增加了，发送通知
             if (currentExpiredCount > lastExpiredCount) {
                 val newExpiredCount = currentExpiredCount - lastExpiredCount

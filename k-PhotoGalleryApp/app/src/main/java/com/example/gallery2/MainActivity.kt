@@ -50,6 +50,8 @@ class MainActivity : AppCompatActivity() {
             loadFolders()
             // 启动后台图片检查服务（只在有权限时启动）
             startPhotoCheckService()
+            // 确保小部件定时更新任务已启动
+            CompletedDateWidget.startAutoUpdate(this)
         } else {
             requestPermissions()
         }
