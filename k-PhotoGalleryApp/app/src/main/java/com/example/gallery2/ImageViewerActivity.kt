@@ -63,6 +63,8 @@ class ImageViewerActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             // 用户确认删除，清空队列并退出
             pendingDeleteManager.clear()
+            // 立即更新Widget
+            CompletedDateWidget.updateAllWidgets(this)
             setResult(RESULT_OK)
             finish()
         } else {
@@ -392,6 +394,8 @@ class ImageViewerActivity : AppCompatActivity() {
                 }
             }
             pendingDeleteManager.clear()
+            // 立即更新Widget
+            CompletedDateWidget.updateAllWidgets(this)
             setResult(RESULT_OK)
             finish()
         }
