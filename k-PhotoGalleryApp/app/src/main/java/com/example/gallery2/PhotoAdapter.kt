@@ -27,6 +27,11 @@ class PhotoAdapter(
     override fun onBindViewHolder(holder: PhotoViewHolder, position: Int) {
         val photo = photos[position]
 
+        // 强制设置item属性，确保点击响应正常
+        holder.itemView.isClickable = true
+        holder.itemView.isFocusable = false
+        holder.itemView.isFocusableInTouchMode = false
+
         // 加载图片缩略图
         Glide.with(context)
             .load(File(photo.path))
@@ -34,6 +39,7 @@ class PhotoAdapter(
             .into(holder.imageViewPhoto)
 
         holder.itemView.setOnClickListener {
+            android.util.Log.d("PhotoAdapter", "点击图片 position=$position, name=${photo.name}")
             listener.onPhotoClick(position)
         }
     }

@@ -39,6 +39,10 @@ class GalleryActivity : AppCompatActivity() {
         recyclerViewPhotos = findViewById(R.id.recyclerViewPhotos)
         recyclerViewPhotos.layoutManager = GridLayoutManager(this, 3)
 
+        // 禁用RecyclerView在触摸模式下的焦点行为，避免第一个item点击问题
+        recyclerViewPhotos.isFocusable = false
+        recyclerViewPhotos.isFocusableInTouchMode = false
+
         loadPhotos()
     }
 

@@ -95,6 +95,12 @@ class ImageViewerActivity : AppCompatActivity() {
         currentPosition = intent.getIntExtra("position", 0)
         folderName = intent.getStringExtra("folder_name") ?: ""
 
+        Log.d("ImageViewerActivity", "onCreate: 图片总数=${photos.size}, 当前位置=$currentPosition")
+        if (photos.isNotEmpty() && currentPosition < photos.size) {
+            val currentPhoto = photos[currentPosition]
+            Log.d("ImageViewerActivity", "当前图片: name=${currentPhoto.name}, path=${currentPhoto.path}")
+        }
+
         fileOperationHelper = FileOperationHelper(this)
 
         prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)

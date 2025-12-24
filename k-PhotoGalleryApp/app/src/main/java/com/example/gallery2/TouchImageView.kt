@@ -167,6 +167,14 @@ class TouchImageView : AppCompatImageView {
         width = MeasureSpec.getSize(widthMeasureSpec).toFloat()
         height = MeasureSpec.getSize(heightMeasureSpec).toFloat()
 
+        // 检查图片尺寸是否已设置，避免除以0
+        if (bmWidth <= 0f || bmHeight <= 0f) {
+            android.util.Log.d("TouchImageView", "onMeasure: bmWidth或bmHeight为0，跳过测量 bmWidth=$bmWidth, bmHeight=$bmHeight")
+            return
+        }
+
+        android.util.Log.d("TouchImageView", "onMeasure: width=$width, height=$height, bmWidth=$bmWidth, bmHeight=$bmHeight")
+
         // Fit width to screen, align to top
         val scaleX = width / bmWidth
         val scale = scaleX // 使用宽度缩放比例
@@ -271,8 +279,25 @@ class TouchImageView : AppCompatImageView {
     }
 
     fun setImageBitmap(bmWidth: Int, bmHeight: Int) {
+        android.util.Log.d("TouchImageView", "setImageBitmap(尺寸): bmWidth=$bmWidth, bmHeight=$bmHeight")
         this.bmWidth = bmWidth.toFloat()
         this.bmHeight = bmHeight.toFloat()
+        // 重置缩放状态
+        saveScale = 1f
+        matrix.reset()
+        matrix.setTranslate(1f, 1f)
+        imageMatrix = matrix
+    }
+
+    override fun setImageBitmap(bm: android.graphics.Bitmap?) {
+        android.util.Log.d("TouchImageView", "setImageBitmap(图片): bitmap=${if (bm != null) "${bm.width}x${bm.height}" else "null"}, bmWidth=$bmWidth, bmHeight=$bmHeight")
+        super.setImageBitmap(bm)
+        if (bm != null && bmWidth > 0 && bmHeight > 0) {
+            android.util.Log.d("TouchImageView", "调用requestLayout和invalidate")
+            // 图片设置后强制重新测量和布局
+            requestLayout()
+            invalidate()
+        }
     }
 
     companion object {

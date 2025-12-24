@@ -38,6 +38,7 @@ class ImagePagerAdapter(
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) {
         val photo = photos[position]
+        android.util.Log.d("ImagePagerAdapter", "绑定图片 position=$position, path=${photo.path}, name=${photo.name}")
 
         holder.imageView.setOnClickListener {
             onImageClickListener?.onImageClick()
@@ -52,19 +53,30 @@ class ImagePagerAdapter(
         val maxWidth = minOf(8192, screenWidth * 5)
         val maxHeight = minOf(8192, screenHeight * 5)
 
+        val photoFile = File(photo.path)
+        android.util.Log.d("ImagePagerAdapter", "文件是否存在: ${photoFile.exists()}, 可读: ${photoFile.canRead()}")
+
         Glide.with(context)
             .asBitmap()
-            .load(File(photo.path))
+            .load(photoFile)
             .override(maxWidth, maxHeight)
             .downsample(DownsampleStrategy.CENTER_INSIDE)
             .format(DecodeFormat.PREFER_RGB_565)
             .into(object : CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    android.util.Log.d("ImagePagerAdapter", "图片加载成功 position=$position, size=${resource.width}x${resource.height}")
+                    // 先设置尺寸
                     holder.imageView.setImageBitmap(resource.width, resource.height)
+                    // 再设置图片，这会触发重新测量
                     holder.imageView.setImageBitmap(resource)
                 }
 
                 override fun onLoadCleared(placeholder: Drawable?) {
+                    android.util.Log.d("ImagePagerAdapter", "清除图片 position=$position")
+                }
+
+                override fun onLoadFailed(errorDrawable: Drawable?) {
+                    android.util.Log.e("ImagePagerAdapter", "图片加载失败 position=$position, path=${photo.path}")
                 }
             })
     }
