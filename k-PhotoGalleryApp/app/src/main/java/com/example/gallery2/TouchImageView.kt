@@ -35,6 +35,10 @@ class TouchImageView : AppCompatImageView {
     private lateinit var scaleDetector: ScaleGestureDetector
     private lateinit var gestureDetector: GestureDetector
 
+    // 用于判断滑动方向
+    private var isVerticalScrolling = false
+    private val SCROLL_THRESHOLD = 20 // 滑动方向判断阈值
+
     constructor(context: Context) : super(context) {
         sharedConstructing(context)
     }
@@ -66,12 +70,14 @@ class TouchImageView : AppCompatImageView {
                     last.set(event.x, event.y)
                     start.set(last)
                     mode = DRAG
+                    isVerticalScrolling = false // 重置垂直滑动标志
                 }
 
                 MotionEvent.ACTION_POINTER_DOWN -> {
                     last.set(event.x, event.y)
                     start.set(last)
                     mode = ZOOM
+                    isVerticalScrolling = false
                     // 禁止 ViewPager2 拦截触摸事件
                     disallowParentInterceptTouchEvent()
                 }
@@ -87,9 +93,25 @@ class TouchImageView : AppCompatImageView {
                         val needHorizontalScroll = scaleWidth > width
                         val needVerticalScroll = scaleHeight > height
 
+                        // 判断滑动方向（只在第一次移动时判断）
+                        if (!isVerticalScrolling && needVerticalScroll) {
+                            val totalDeltaX = Math.abs(curr.x - start.x)
+                            val totalDeltaY = Math.abs(curr.y - start.y)
+
+                            // 如果垂直滑动距离明显大于水平滑动，则认为是垂直滑动
+                            if (totalDeltaY > SCROLL_THRESHOLD && totalDeltaY > totalDeltaX * 1.5) {
+                                isVerticalScrolling = true
+                                disallowParentInterceptTouchEvent()
+                            }
+                        }
+
                         if (needHorizontalScroll || needVerticalScroll) {
-                            // 只有在需要水平滚动时才禁止ViewPager2拦截
-                            if (needHorizontalScroll) {
+                            // 如果是垂直滑动模式，禁止水平移动
+                            if (isVerticalScrolling) {
+                                deltaX = 0f
+                                disallowParentInterceptTouchEvent()
+                            } else if (needHorizontalScroll) {
+                                // 只有在需要水平滚动且不是垂直滑动模式时才禁止ViewPager2拦截
                                 disallowParentInterceptTouchEvent()
                             }
 
@@ -110,10 +132,16 @@ class TouchImageView : AppCompatImageView {
                                 }
                                 else -> {
                                     // 图片同时需要水平和垂直滚动
-                                    if (x + deltaX > 0)
-                                        deltaX = -x
-                                    else if (x + deltaX < -right)
-                                        deltaX = -(x + right)
+                                    if (!isVerticalScrolling) {
+                                        // 非垂直滑动模式时，允许水平移动
+                                        if (x + deltaX > 0)
+                                            deltaX = -x
+                                        else if (x + deltaX < -right)
+                                            deltaX = -(x + right)
+                                    } else {
+                                        // 垂直滑动模式时，禁止水平移动
+                                        deltaX = 0f
+                                    }
 
                                     if (y + deltaY > 0)
                                         deltaY = -y
@@ -132,6 +160,7 @@ class TouchImageView : AppCompatImageView {
 
                 MotionEvent.ACTION_UP -> {
                     mode = NONE
+                    isVerticalScrolling = false // 重置垂直滑动标志
                     allowParentInterceptTouchEvent()
                     val xDiff = Math.abs(curr.x - start.x).toInt()
                     val yDiff = Math.abs(curr.y - start.y).toInt()
@@ -141,6 +170,7 @@ class TouchImageView : AppCompatImageView {
 
                 MotionEvent.ACTION_POINTER_UP -> {
                     mode = NONE
+                    isVerticalScrolling = false
                     allowParentInterceptTouchEvent()
                 }
             }
