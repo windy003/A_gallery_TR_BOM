@@ -88,7 +88,8 @@ class PhotoManager(private val context: Context) {
 
     /**
      * 判断文件路径是否在目标目录中
-     * 只扫描 /DCIM/Screenshots、/Pictures/Screenshots 和 /Pictures/ImageStitcher 三个目录
+     * 只扫描 /DCIM/Screenshots、/Pictures/Screenshots、/Pictures/ImageStitcher 和 /Download(s)/ 四个目录
+     * 注意：Download(s) 目录只扫描直接子文件，不包含子目录
      *
      * @param path 文件路径
      * @return 是否在目标目录中
@@ -102,9 +103,32 @@ class PhotoManager(private val context: Context) {
         val lowerPath = path.lowercase()
 
         // 检查是否在 /DCIM/Screenshots、/Pictures/Screenshots 或 /Pictures/ImageStitcher 目录中
-        return lowerPath.contains("/dcim/screenshots") ||
+        if (lowerPath.contains("/dcim/screenshots") ||
                 lowerPath.contains("/pictures/screenshots") ||
-                lowerPath.contains("/pictures/imagestitcher")
+                lowerPath.contains("/pictures/imagestitcher")) {
+            return true
+        }
+
+        // 检查 Download 或 Downloads 目录（不包含子目录）
+        val downloadIndex = when {
+            lowerPath.contains("/download/") -> lowerPath.indexOf("/download/")
+            lowerPath.contains("/downloads/") -> lowerPath.indexOf("/downloads/")
+            else -> -1
+        }
+
+        if (downloadIndex != -1) {
+            // 获取 download/downloads 之后的部分
+            val afterDownload = if (lowerPath.contains("/download/")) {
+                lowerPath.substring(downloadIndex + "/download/".length)
+            } else {
+                lowerPath.substring(downloadIndex + "/downloads/".length)
+            }
+
+            // 如果之后的部分不包含斜杠，说明是直接在 Download 目录下的文件
+            return !afterDownload.contains("/")
+        }
+
+        return false
     }
 
     /**

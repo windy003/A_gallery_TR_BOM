@@ -108,8 +108,8 @@ class FileOperationHelper(private val context: Context) {
     private fun extractRelativePath(fullPath: String): String {
         // 尝试从路径中提取Pictures之后的部分
         return when {
-            fullPath.contains("/Pictures/") -> {
-                val picturesIndex = fullPath.indexOf("/Pictures/")
+            fullPath.contains("/Pictures/", ignoreCase = true) -> {
+                val picturesIndex = fullPath.indexOf("/Pictures/", ignoreCase = true)
                 val afterPictures = fullPath.substring(picturesIndex + 1)
                 // 移除文件名，只保留目录路径
                 val lastSlash = afterPictures.lastIndexOf('/')
@@ -119,8 +119,8 @@ class FileOperationHelper(private val context: Context) {
                     "Pictures/"
                 }
             }
-            fullPath.contains("/DCIM/") -> {
-                val dcimIndex = fullPath.indexOf("/DCIM/")
+            fullPath.contains("/DCIM/", ignoreCase = true) -> {
+                val dcimIndex = fullPath.indexOf("/DCIM/", ignoreCase = true)
                 val afterDCIM = fullPath.substring(dcimIndex + 1)
                 val lastSlash = afterDCIM.lastIndexOf('/')
                 if (lastSlash > 0) {
@@ -128,6 +128,12 @@ class FileOperationHelper(private val context: Context) {
                 } else {
                     "DCIM/Camera/"
                 }
+            }
+            fullPath.contains("/Download/", ignoreCase = true) -> {
+                "Download/"
+            }
+            fullPath.contains("/Downloads/", ignoreCase = true) -> {
+                "Downloads/"
             }
             else -> "Pictures/"
         }
