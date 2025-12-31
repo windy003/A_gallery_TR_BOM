@@ -205,20 +205,23 @@ class TouchImageView : AppCompatImageView {
 
         android.util.Log.d("TouchImageView", "onMeasure: width=$width, height=$height, bmWidth=$bmWidth, bmHeight=$bmHeight")
 
-        // Fit width to screen, align to top
+        // 使用 fit-center 方式：选择较小的缩放比例，让图片完整显示并居中
         val scaleX = width / bmWidth
-        val scale = scaleX // 使用宽度缩放比例
+        val scaleY = height / bmHeight
+        val scale = Math.min(scaleX, scaleY) // 选择较小的缩放比例
         matrix.setScale(scale, scale)
 
-        // Align to top (no vertical centering)
-        redundantYSpace = 0f // 顶部对齐，不需要垂直偏移
-        redundantXSpace = 0f // 宽度已经完全填充，不需要水平偏移
+        // 计算图片缩放后的实际尺寸
+        origWidth = scale * bmWidth
+        origHeight = scale * bmHeight
+
+        // 计算冗余空间，用于居中显示
+        redundantXSpace = (width - origWidth) / 2f
+        redundantYSpace = (height - origHeight) / 2f
 
         matrix.postTranslate(redundantXSpace, redundantYSpace)
 
-        // 计算图片实际显示的尺寸
-        origWidth = scale * bmWidth
-        origHeight = scale * bmHeight
+        // 计算边界（用于拖动限制）
         right = origWidth * saveScale - width
         bottom = origHeight * saveScale - height
 
@@ -244,8 +247,8 @@ class TouchImageView : AppCompatImageView {
                 scaleFactor = minScale / origScale
             }
 
-            right = width * saveScale - width - (2 * redundantXSpace * saveScale)
-            bottom = height * saveScale - height - (2 * redundantYSpace * saveScale)
+            right = origWidth * saveScale - width
+            bottom = origHeight * saveScale - height
 
             if (origWidth * saveScale <= width || origHeight * saveScale <= height) {
                 matrix.postScale(scaleFactor, scaleFactor, width / 2, height / 2)
