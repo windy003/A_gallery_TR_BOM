@@ -15,7 +15,7 @@
     <application
         android:allowBackup="true"
         android:icon="@drawable/a2048x2048"
-        android:label="K_GTR_BOH"
+        android:label="K_GTR_BOM"
         android:supportsRtl="true"
         android:requestLegacyExternalStorage="true"
         android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
